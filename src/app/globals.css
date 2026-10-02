@@ -1,0 +1,410 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark theme tokens. Everything semantic resolves to these. */
+  --bg: #060912;
+  --bg-elevated: #0b1124;
+  --surface: rgba(255, 255, 255, 0.035);
+  --surface-strong: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --text: #f1f5f9;
+  --text-2: rgba(241, 245, 249, 0.78);
+  --text-3: rgba(241, 245, 249, 0.55);
+  --cyan: #22d3ee;
+  --cyan-deep: #06b6d4;
+  --emerald: #10b981;
+
+  /* Spotlight position — updated by JS on mousemove. */
+  --mouse-x: 50%;
+  --mouse-y: -200px;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-display: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Monaco,
+    Consolas, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+}
+
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-feature-settings: "ss01", "cv11";
+  text-rendering: optimizeLegibility;
+  position: relative;
+}
+
+/* Ambient corner glows. Painted behind everything via z-index: 0. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 18% -10%,
+      rgba(34, 211, 238, 0.22),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 85% 110%,
+      rgba(16, 185, 129, 0.12),
+      transparent 55%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* The cursor-following torch. Sits BELOW content (z-index: 0); the
+ * page chrome and most surfaces are translucent, so the cyan glow
+ * shines through them while photos and other opaque media remain
+ * naturally untouched. JS writes --mouse-x / --mouse-y on <html>. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    /* Focused core — soft white-cyan */
+    radial-gradient(
+      200px circle at var(--mouse-x) var(--mouse-y),
+      rgba(190, 245, 255, 0.38),
+      rgba(34, 211, 238, 0.24) 35%,
+      transparent 70%
+    ),
+    /* Mid halo */
+    radial-gradient(
+      480px circle at var(--mouse-x) var(--mouse-y),
+      rgba(34, 211, 238, 0.18),
+      transparent 65%
+    ),
+    /* Soft outer wash */
+    radial-gradient(
+      860px circle at var(--mouse-x) var(--mouse-y),
+      rgba(34, 211, 238, 0.08),
+      transparent 65%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Disable spotlight on touch devices and reduced-motion preference. */
+@media (prefers-reduced-motion: reduce), (hover: none) {
+  body::after {
+    display: none;
+  }
+}
+
+main,
+header,
+footer {
+  position: relative;
+  z-index: 1;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 639.98px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+::selection {
+  background: rgba(34, 211, 238, 0.35);
+  color: #ffffff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@layer components {
+  .container-prose {
+    @apply container max-w-6xl;
+  }
+
+  /* Card surface — translucent over body bg, with hairline border.
+   * Translucency lets the cursor spotlight glow through the card from
+   * the layer below, giving cards a sense of life under the cursor. */
+  .surface {
+    border: 1px solid var(--border);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.05),
+        rgba(255, 255, 255, 0.015)
+      );
+    border-radius: 1rem;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* A stronger surface for emphasis or nested elements. */
+  .surface-strong {
+    border: 1px solid var(--border-strong);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.08),
+        rgba(255, 255, 255, 0.025)
+      );
+    border-radius: 1rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Kept for backwards compatibility — it now reads as a slightly more
+   * elevated surface than the default. */
+  .surface-dark {
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 100%
+    );
+    border-radius: 1rem;
+    color: var(--text);
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium;
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text-2);
+    backdrop-filter: blur(8px);
+  }
+
+  .pill-dark {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/80;
+  }
+
+  .btn {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-brand focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    --tw-ring-offset-color: var(--bg);
+  }
+
+  /* Primary CTA: cyan fill on dark — high contrast, the main action. */
+  .btn-primary {
+    @apply btn bg-cyan-brand text-navy-800 hover:bg-cyan-300 hover:shadow-glow;
+  }
+
+  /* Accent kept for visual variation in places that already use it. */
+  .btn-accent {
+    @apply btn bg-white text-navy-800 hover:bg-white/90 hover:shadow-soft;
+  }
+
+  /* Ghost: subtle dark surface with light text. */
+  .btn-ghost {
+    @apply btn border text-white;
+    border-color: var(--border-strong);
+    background: var(--surface);
+  }
+  .btn-ghost:hover {
+    background: var(--surface-strong);
+  }
+
+  /* Legacy alias still used in a few places. Same as ghost in dark. */
+  .btn-outline-dark {
+    @apply btn-ghost;
+  }
+
+  .section {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em];
+    color: var(--cyan);
+  }
+
+  .heading-1 {
+    @apply text-[clamp(2rem,6.5vw,3.75rem)] font-semibold tracking-tight sm:text-5xl lg:text-6xl;
+    color: var(--text);
+  }
+
+  .heading-2 {
+    @apply text-[clamp(1.75rem,5.5vw,2.5rem)] font-semibold tracking-tight sm:text-4xl;
+    color: var(--text);
+  }
+
+  .heading-3 {
+    @apply text-lg font-semibold tracking-tight sm:text-2xl;
+    color: var(--text);
+  }
+
+  .lead {
+    @apply text-lg leading-relaxed sm:text-xl;
+    color: var(--text-2);
+  }
+
+  .card-hover {
+    @apply transition-all duration-300;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-strong);
+    background: var(--surface-strong);
+  }
+
+  /* Per-card spotlight. JS writes --card-x / --card-y in card-local
+   * pixel coordinates on mousemove. The ::before overlay paints a soft
+   * cyan light at that point; siblings sit above it. */
+  .spotlight-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .spotlight-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      320px circle at var(--card-x, -200px) var(--card-y, -200px),
+      rgba(125, 235, 250, 0.22),
+      rgba(34, 211, 238, 0.1) 30%,
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 250ms ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .spotlight-card:hover::before {
+    opacity: 1;
+  }
+  .spotlight-card > * {
+    position: relative;
+    z-index: 1;
+  }
+  @media (hover: none) {
+    .spotlight-card::before {
+      display: none;
+    }
+  }
+
+  /* Thin gradient divider used to break up sections without harsh borders. */
+  .section-divider {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.12),
+      transparent
+    );
+  }
+
+  /* Photographic media container. Photos are naturally opaque, so the
+   * cursor spotlight (which lives BELOW content) cannot bleed into them.
+   * This class just provides the positioning hook for fill-mode Images. */
+  .media-frame {
+    position: relative;
+  }
+
+  .grid-bg {
+    background-image: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.04) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.04) 1px,
+        transparent 1px
+      );
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(
+      ellipse at top,
+      black 30%,
+      transparent 75%
+    );
+    mask-image: radial-gradient(ellipse at top, black 30%, transparent 75%);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .gradient-text {
+    background-image: linear-gradient(90deg, #22d3ee 0%, #10b981 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 450ms ease-out, transform 450ms ease-out;
+    will-change: opacity, transform;
+  }
+  .reveal-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  .fade-in {
+    animation: fadeInUp 500ms ease-out both;
+  }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fade-in {
+      animation: none;
+    }
+  }
+}

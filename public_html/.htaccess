@@ -1,0 +1,26 @@
+RewriteEngine On
+
+# Keep PHP includes private. API scripts stay reachable.
+RewriteRule ^backend/(?!api/) - [F,L]
+
+# /cvs is also the PDF folder. Send the menu URL to the page before the folder is served.
+RewriteRule ^cvs/?$ cvs.php [L]
+
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^about/?$ about.php [L]
+RewriteRule ^projects/?$ projects.php [L]
+RewriteRule ^projects/([a-z0-9-]+)/?$ project.php?slug=$1 [L,QSA]
+RewriteRule ^services/?$ services.php [L]
+RewriteRule ^contact/?$ contact.php [L]
+RewriteRule ^github-activity/?$ github.php [L]
+RewriteRule ^admin/site/([a-z]+)/?$ admin-site.php?page=$1 [L,QSA]
+RewriteRule ^admin/projects/?$ admin-projects.php [L]
+RewriteRule ^admin/?$ admin.php [L]
+
+ErrorDocument 404 /404.php
+
+DirectoryIndex index.php
+Options -Indexes
